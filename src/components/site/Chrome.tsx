@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 const nav = [
   { to: "/", label: "Overview" },
   { to: "/history", label: "2014–present" },
+  { to: "/evidence", label: "Evidence 2019–2026" },
   { to: "/explorer", label: "Price explorer" },
   { to: "/varieties", label: "Variety atlas" },
   { to: "/government", label: "Government & PDS" },
@@ -93,6 +94,11 @@ export function SiteFooter() {
           <h2 className="eyebrow">Standards</h2>
           <ul className="mt-2 space-y-1 text-xs">
             <li>
+              <Link to="/evidence" className="underline underline-offset-2">
+                Evidence archive, 2019–2026
+              </Link>
+            </li>
+            <li>
               <Link to="/sources" className="underline underline-offset-2">
                 Methodology and corrections
               </Link>
@@ -112,9 +118,10 @@ export function SiteFooter() {
         <div>
           <h2 className="eyebrow">Current status</h2>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            The homepage uses source-linked official records and leaves unavailable periods blank.
-            The explorer and some investigation pages remain prototypes and may still contain clearly
-            labelled demonstration records until their row-level sources are completed.
+            The homepage and 2019–2026 evidence archive use source-linked records and preserve the
+            difference between official releases, reported statements, local market quotations and
+            inference. The explorer and some investigation pages remain prototypes with labelled
+            demonstration records until their row-level sources are completed.
           </p>
         </div>
       </div>
