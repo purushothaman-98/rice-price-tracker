@@ -1,5 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ExternalLink, FileCheck2, Landmark, Scale, Wheat } from "lucide-react";
+import {
+  ArrowRight,
+  Calculator,
+  ExternalLink,
+  FileCheck2,
+  Landmark,
+  Newspaper,
+  Scale,
+  ShieldAlert,
+  TrendingUp,
+  Wheat,
+} from "lucide-react";
 import { KolamRule, SectionHeading } from "@/components/site/Editorial";
 import {
   policyTimeline,
@@ -9,6 +20,13 @@ import {
   sources,
   type PublicRecordSource,
 } from "@/data/publicRecord";
+import {
+  derivedFindings,
+  recentEvidenceItems,
+  recentEvidenceSourceById,
+  recentEvidenceSources,
+  type RecentEvidenceSource,
+} from "@/data/recentEvidence";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,7 +35,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A source-linked public record of Tamil Nadu retail rice prices, paddy procurement, PDS policy, tax changes and government interventions from 2014 onward.",
+          "A source-linked public record of Tamil Nadu retail rice prices, paddy procurement, recent market evidence, PDS policy, tax changes and government interventions from 2014 onward.",
       },
       {
         property: "og:title",
@@ -26,7 +44,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Official observations are shown with their source, period and measurement type. Missing years remain blank rather than estimated.",
+          "Official observations, recent press evidence and derived findings are separated by source type, calculation and limitation.",
       },
     ],
   }),
@@ -63,6 +81,40 @@ function SourceLink({ source, compact = false }: { source: PublicRecordSource; c
   );
 }
 
+function RecentSourceLink({ source, compact = false }: { source: RecentEvidenceSource; compact?: boolean }) {
+  return (
+    <a
+      href={source.url}
+      target="_blank"
+      rel="noreferrer"
+      className={
+        compact
+          ? "inline-flex items-center gap-1 font-semibold text-maroon underline decoration-maroon/40 underline-offset-2 hover:decoration-maroon"
+          : "inline-flex min-h-11 items-center gap-2 border border-maroon px-3 text-sm font-bold text-maroon hover:bg-maroon hover:text-maroon-foreground"
+      }
+    >
+      {compact ? source.publisher : "Open source"}
+      <ExternalLink className={compact ? "size-3" : "size-4"} aria-hidden="true" />
+    </a>
+  );
+}
+
+function SourceReference({ sourceId }: { sourceId: string }) {
+  const recent = recentEvidenceSourceById[sourceId];
+  if (recent) return <RecentSourceLink source={recent} compact />;
+
+  const official = sourceById[sourceId];
+  if (official) return <SourceLink source={official} compact />;
+
+  return null;
+}
+
+function evidenceTone(type: (typeof recentEvidenceItems)[number]["evidenceType"]) {
+  if (type === "Official policy") return "border-paddy bg-paddy/10 text-paddy";
+  if (type === "Official statement reported") return "border-turmeric bg-turmeric/15 text-foreground";
+  return "border-maroon bg-maroon/5 text-maroon";
+}
+
 function Home() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -71,7 +123,7 @@ function Home() {
           <FileCheck2 className="size-4" aria-hidden="true" />
           Source-linked public record
         </div>
-        <p className="eyebrow mt-5">Tamil Nadu · 2014 to the latest source-linked record</p>
+        <p className="eyebrow mt-5">Tamil Nadu · 2014 to the latest source-linked evidence</p>
         <h2
           id="hero-heading"
           className="mt-2 max-w-5xl text-4xl font-extrabold leading-[1.02] sm:text-6xl"
@@ -79,9 +131,9 @@ function Home() {
           Tamil Nadu rice prices, procurement and public policy — without filling the gaps.
         </h2>
         <p className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          This homepage contains only observations that are attached to an official public source.
-          Retail rice, paddy procurement and PDS issue prices are kept separate because they measure
-          different parts of the food system. Years without a comparable loaded value remain blank.
+          Official series, government press releases and reported market observations are shown as
+          different evidence layers. Retail rice, paddy procurement and PDS prices remain separate.
+          Every inference below states its calculation and what the available evidence cannot prove.
         </p>
 
         <div className="mt-6 grid gap-3 md:grid-cols-3">
@@ -93,17 +145,17 @@ function Home() {
             </p>
           </article>
           <article className="border-l-4 border-turmeric bg-card p-4">
-            <p className="eyebrow">Paddy procurement record</p>
-            <p className="mt-2 text-3xl font-extrabold">2014–15 onward</p>
+            <p className="eyebrow">Recent evidence desk</p>
+            <p className="mt-2 text-3xl font-extrabold">2024–2026</p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Season-wise TNCSC centres and quantity procured, including the in-progress 2025–26 figure.
+              Official policy notes, procurement statements and source-labelled market reporting.
             </p>
           </article>
           <article className="border-l-4 border-paddy bg-card p-4">
-            <p className="eyebrow">PDS issue price</p>
-            <p className="mt-2 text-3xl font-extrabold">Free of cost</p>
+            <p className="eyebrow">Paddy procurement record</p>
+            <p className="mt-2 text-3xl font-extrabold">2014–15 onward</p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              TNCSC states that rice is supplied free to eligible rice-card holders. This is not a private retail price.
+              Season-wise TNCSC centres and quantity, including the dated in-progress 2025–26 figure.
             </p>
           </article>
         </div>
@@ -246,6 +298,115 @@ function Home() {
 
       <KolamRule />
 
+      <section aria-labelledby="recent-evidence" className="py-9">
+        <SectionHeading
+          id="recent-evidence"
+          eyebrow="Recent evidence desk · 2024–2026"
+          title="Press releases and news are evidence layers, not substitutes for a price series"
+          intro="Official policy documents tell us what changed legally. Government statements report programme progress. News reports provide market quotations and actor claims. The cards below preserve those differences."
+        />
+
+        <div className="mt-5 flex flex-wrap gap-2 text-xs">
+          <span className="border border-paddy bg-paddy/10 px-2 py-1 font-bold text-paddy">Official policy</span>
+          <span className="border border-turmeric bg-turmeric/15 px-2 py-1 font-bold">Official statement reported</span>
+          <span className="border border-maroon bg-maroon/5 px-2 py-1 font-bold text-maroon">Market reporting</span>
+        </div>
+
+        <div className="mt-6 space-y-4">
+          {recentEvidenceItems.map((item) => (
+            <article key={`${item.date}-${item.title}`} className="border border-border bg-card p-4 sm:p-5">
+              <div className="grid gap-4 lg:grid-cols-[10rem_minmax(0,1fr)]">
+                <div>
+                  <p className="eyebrow">{item.date}</p>
+                  <span className={`mt-3 inline-flex border px-2 py-1 text-[11px] font-bold uppercase tracking-wider ${evidenceTone(item.evidenceType)}`}>
+                    {item.evidenceType}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-extrabold">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed">{item.whatIsSupported}</p>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.figures.map((figure) => (
+                      <span key={figure} className="border border-border bg-secondary px-2 py-1 text-xs font-bold">
+                        {figure}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="border-l-4 border-paddy bg-paddy/10 p-3">
+                      <p className="eyebrow">Interpretation</p>
+                      <p className="mt-1 text-sm leading-relaxed">{item.interpretation}</p>
+                    </div>
+                    <div className="border-l-4 border-turmeric bg-turmeric/10 p-3">
+                      <p className="eyebrow">Limitation</p>
+                      <p className="mt-1 text-sm leading-relaxed">{item.limitation}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+                    {item.sourceIds.map((sourceId) => (
+                      <SourceReference key={sourceId} sourceId={sourceId} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <KolamRule />
+
+      <section aria-labelledby="derived-analysis" className="py-9">
+        <SectionHeading
+          id="derived-analysis"
+          eyebrow="Transparent inference"
+          title="What can be calculated or inferred from the available evidence?"
+          intro="Calculated values are derived from cited observations. Interpretive findings are labelled separately and never promoted to official facts."
+        />
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {derivedFindings.map((finding) => (
+            <article key={finding.title} className="border border-border bg-card p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow">{finding.confidence} confidence</p>
+                  <h3 className="mt-1 text-lg font-extrabold">{finding.title}</h3>
+                </div>
+                {finding.calculation ? (
+                  <Calculator className="size-5 shrink-0 text-maroon" aria-hidden="true" />
+                ) : (
+                  <TrendingUp className="size-5 shrink-0 text-maroon" aria-hidden="true" />
+                )}
+              </div>
+
+              <p className="tabular mt-4 text-3xl font-extrabold text-maroon">{finding.value}</p>
+              {finding.calculation ? (
+                <p className="mt-2 border-l-2 border-maroon pl-3 font-mono text-xs leading-relaxed text-muted-foreground">
+                  {finding.calculation}
+                </p>
+              ) : null}
+              <p className="mt-3 text-sm leading-relaxed">{finding.finding}</p>
+
+              <div className="mt-4 flex gap-2 border-l-4 border-turmeric bg-turmeric/10 p-3">
+                <ShieldAlert className="mt-0.5 size-4 shrink-0 text-maroon" aria-hidden="true" />
+                <p className="text-xs leading-relaxed text-muted-foreground">{finding.caution}</p>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs">
+                {finding.sourceIds.map((sourceId) => (
+                  <SourceReference key={sourceId} sourceId={sourceId} />
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <KolamRule />
+
       <section aria-labelledby="policy-record" className="py-9">
         <SectionHeading
           id="policy-record"
@@ -321,17 +482,20 @@ function Home() {
         <SectionHeading
           id="source-shelf"
           eyebrow="Open the evidence"
-          title="Primary source shelf"
-          intro="Every source opens directly in a new tab. The homepage prioritises official data, official policy documents and primary legal texts."
+          title="Source shelf: official records, press releases and reported markets"
+          intro="Every source opens directly in a new tab. Source type and publication date remain visible so a reported quotation is never mistaken for an official state-wide series."
         />
 
-        <div className="mt-5 grid gap-3 md:grid-cols-2">
+        <h3 className="mt-6 flex items-center gap-2 text-lg font-extrabold">
+          <FileCheck2 className="size-5 text-maroon" aria-hidden="true" /> Primary official record
+        </h3>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
           {sources.map((source) => (
             <article key={source.id} className="border border-border bg-card p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="eyebrow">{source.kind.replaceAll("-", " ")}</p>
-                  <h3 className="mt-1 font-bold">{source.title}</h3>
+                  <h4 className="mt-1 font-bold">{source.title}</h4>
                 </div>
                 <ExternalLink className="mt-1 size-4 shrink-0 text-maroon" aria-hidden="true" />
               </div>
@@ -342,13 +506,36 @@ function Home() {
             </article>
           ))}
         </div>
+
+        <h3 className="mt-8 flex items-center gap-2 text-lg font-extrabold">
+          <Newspaper className="size-5 text-maroon" aria-hidden="true" /> Recent release and market evidence
+        </h3>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          {recentEvidenceSources.map((source) => (
+            <article key={source.id} className="border border-border bg-card p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="eyebrow">
+                    {source.kind.replaceAll("-", " ")} · {source.publishedDate}
+                  </p>
+                  <h4 className="mt-1 font-bold">{source.title}</h4>
+                </div>
+                <ExternalLink className="mt-1 size-4 shrink-0 text-maroon" aria-hidden="true" />
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{source.note}</p>
+              <div className="mt-3 text-xs">
+                <RecentSourceLink source={source} compact />
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="mt-2 border-y-4 border-double border-maroon bg-secondary px-4 py-7">
         <p className="eyebrow">Continue the record</p>
         <h2 className="mt-1 text-2xl font-extrabold">Explore the history without losing the source trail.</h2>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-          The dedicated pages provide deeper context. Prototype explorer pages may still contain demonstration records; the homepage above is deliberately limited to source-linked official material.
+          The dedicated pages provide deeper context. Prototype explorer pages may still contain demonstration records; the homepage above separates official observations, reported evidence and inference.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
