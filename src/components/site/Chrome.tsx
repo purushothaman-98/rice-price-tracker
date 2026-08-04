@@ -4,16 +4,14 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { to: "/", label: "Today" },
+  { to: "/", label: "Overview" },
+  { to: "/history", label: "2014–present" },
   { to: "/explorer", label: "Price explorer" },
   { to: "/varieties", label: "Variety atlas" },
-  { to: "/history", label: "History" },
-  { to: "/government", label: "Government role" },
-  { to: "/investigation-2024", label: "2023–24 investigation" },
-  { to: "/watch-2026", label: "2026 watch" },
-  { to: "/tax", label: "Tax & packages" },
-  { to: "/sources", label: "Source library" },
-  { to: "/newsroom", label: "Newsroom" },
+  { to: "/government", label: "Government & PDS" },
+  { to: "/tax", label: "Tax & packaging" },
+  { to: "/newsroom", label: "Investigations" },
+  { to: "/sources", label: "Sources" },
   { to: "/admin", label: "Admin" },
 ] as const;
 
@@ -40,7 +38,7 @@ export function SiteHeader() {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <span className="hidden text-xs text-muted-foreground sm:inline">
-              நெல் விலை கண்காணிப்பு
+              அரிசி விலை பொதுப் பதிவு
             </span>
             <button
               type="button"
@@ -114,8 +112,9 @@ export function SiteFooter() {
         <div>
           <h2 className="eyebrow">Current status</h2>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            All figures on this site are demonstration records pending verified live feeds. Every
-            number carries a confidence label, a unit and a market stage.
+            The homepage uses source-linked official records and leaves unavailable periods blank.
+            The explorer and some investigation pages remain prototypes and may still contain clearly
+            labelled demonstration records until their row-level sources are completed.
           </p>
         </div>
       </div>
